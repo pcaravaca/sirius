@@ -29,21 +29,21 @@
           <div class="stat-icon">✅</div>
           <div class="stat-content">
             <span class="stat-value">{{ completedTasks }}</span>
-            <span class="stat-label">Tareas Completadas</span>
+            <span class="stat-label">Completadas</span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">⏳</div>
           <div class="stat-content">
             <span class="stat-value">{{ pendingTasks }}</span>
-            <span class="stat-label">Tareas Pendientes</span>
+            <span class="stat-label">Pendientes</span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">🔥</div>
           <div class="stat-content">
             <span class="stat-value">{{ activeProjects }}</span>
-            <span class="stat-label">Proyectos Activos</span>
+            <span class="stat-label">Activos</span>
           </div>
         </div>
       </div>
@@ -64,50 +64,65 @@
         </div>
       </div>
 
-      <!-- Projects & Tasks -->
-      <div class="content-row">
-        <div class="card projects-card">
-          <div class="card-header">
-            <h2>📁 Proyectos</h2>
-            <button class="btn-add" @click="showProjectModal = true">+</button>
-          </div>
-          <div class="list">
-            <div v-for="project in dashboard.projects" :key="project.id" class="item">
-              <div class="item-info">
-                <span class="item-name">{{ project.name }}</span>
-                <span class="item-desc">{{ project.description }}</span>
-              </div>
-              <div class="item-status" :class="project.status">
-                {{ project.status }}
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: project.progress + '%' }"></div>
-              </div>
-            </div>
-          </div>
+      <!-- Tareas por Proyecto -->
+      <div class="projects-tasks-section">
+        <h2>📋 Tareas por Proyecto</h2>
+        
+        <div class="project-tabs">
+          <button 
+            v-for="project in dashboard.projects" 
+            :key="project.id"
+            class="project-tab"
+            :class="{ active: activeProjectTab === project.id }"
+            @click="activeProjectTab = project.id"
+          >
+            {{ project.name }}
+            <span class="task-count">
+              {{ getProjectTaskCount(project.id) }}
+            </span>
+          </button>
         </div>
 
-        <div class="card tasks-card">
-          <div class="card-header">
-            <h2>✅ Tareas</h2>
-            <button class="btn-add" @click="showTaskModal = true">+</button>
+        <div class="project-tasks-content" v-if="activeProject">
+          <div class="tasks-header">
+            <h3>{{ activeProject.name }}</h3>
+            <span class="project-status" :class="activeProject.status">
+              {{ activeProject.status }}
+            </span>
           </div>
-          <div class="list">
-            <div v-for="task in dashboard.tasks" :key="task.id" class="item task-item">
+          
+          <div class="project-progress">
+            <div class="progress-bar large">
+              <div class="progress-fill" :style="{ width: activeProject.progress + '%' }"></div>
+            </div>
+            <span class="progress-text">{{ activeProject.progress }}%</span>
+          </div>
+
+          <div class="tasks-list">
+            <div 
+              v-for="task in getProjectTasks(activeProject.id)" 
+              :key="task.id" 
+              class="task-row"
+              :class="task.status"
+            >
               <input 
                 type="checkbox" 
                 :checked="task.status === 'completed'"
                 @change="toggleTask(task.id)"
               />
-              <div class="item-info">
-                <span class="item-title" :class="{ completed: task.status === 'completed' }">
+              <div class="task-info">
+                <span class="task-title" :class="{ completed: task.status === 'completed' }">
                   {{ task.title }}
                 </span>
-                <span class="item-meta">
-                  {{ getProjectName(task.projectId) }} • {{ task.dueDate }}
-                </span>
+                <span class="task-desc" v-if="task.description">{{ task.description }}</span>
               </div>
-              <span class="priority" :class="task.priority">{{ task.priority }}</span>
+              <span class="task-due" v-if="task.dueDate">{{ task.dueDate }}</span>
+              <span class="priority-badge" :class="task.priority">{{ task.priority }}</span>
+              <span class="task-status-badge" :class="task.status">{{ task.status }}</span>
+            </div>
+            
+            <div class="no-tasks" v-if="getProjectTasks(activeProject.id).length === 0">
+              No hay tareas para este proyecto
             </div>
           </div>
         </div>
@@ -119,51 +134,6 @@
         <p>{{ dashboard.motivational }}</p>
       </div>
     </main>
-
-    <!-- Modals -->
-    <div class="modal" v-if="showProjectModal" @click.self="showProjectModal = false">
-      <div class="modal-content">
-        <h3>Nuevo Proyecto</h3>
-        <input v-model="newProject.name" placeholder="Nombre" />
-        <input v-model="newProject.description" placeholder="Descripción" />
-        <select v-model="newProject.status">
-          <option value="active">Activo</option>
-          <option value="paused">Pausado</option>
-          <option value="completed">Completado</option>
-        </select>
-        <select v-model="newProject.priority">
-          <option value="high">Alta</option>
-          <option value="medium">Media</option>
-          <option value="low">Baja</option>
-        </select>
-        <div class="modal-actions">
-          <button @click="createProject">Crear</button>
-          <button class="cancel" @click="showProjectModal = false">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal" v-if="showTaskModal" @click.self="showTaskModal = false">
-      <div class="modal-content">
-        <h3>Nueva Tarea</h3>
-        <input v-model="newTask.title" placeholder="Título" />
-        <input v-model="newTask.description" placeholder="Descripción" />
-        <select v-model="newTask.projectId">
-          <option value="">Seleccionar Proyecto</option>
-          <option v-for="p in dashboard.projects" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
-        <select v-model="newTask.priority">
-          <option value="high">Alta</option>
-          <option value="medium">Media</option>
-          <option value="low">Baja</option>
-        </select>
-        <input v-model="newTask.dueDate" type="date" />
-        <div class="modal-actions">
-          <button @click="createTask">Crear</button>
-          <button class="cancel" @click="showTaskModal = false">Cancelar</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -179,11 +149,7 @@ const API_URL = '/api'
 const dashboard = ref({})
 const progressChart = ref(null)
 const taskChart = ref(null)
-const showProjectModal = ref(false)
-const showTaskModal = ref(false)
-
-const newProject = ref({ name: '', description: '', status: 'active', priority: 'medium' })
-const newTask = ref({ title: '', description: '', projectId: '', priority: 'medium', dueDate: '' })
+const activeProjectTab = ref(null)
 
 const completedTasks = computed(() => 
   dashboard.value.tasks?.filter(t => t.status === 'completed').length || 0
@@ -197,15 +163,36 @@ const activeProjects = computed(() =>
   dashboard.value.projects?.filter(p => p.status === 'active').length || 0
 )
 
+const activeProject = computed(() => {
+  if (!activeProjectTab.value) return null
+  return dashboard.value.projects?.find(p => p.id === activeProjectTab.value)
+})
+
 const getProjectName = (id) => {
   const p = dashboard.value.projects?.find(p => p.id === id)
   return p?.name || 'Sin proyecto'
+}
+
+const getProjectTasks = (projectId) => {
+  return dashboard.value.tasks?.filter(t => t.projectId === projectId) || []
+}
+
+const getProjectTaskCount = (projectId) => {
+  const tasks = getProjectTasks(projectId)
+  const completed = tasks.filter(t => t.status === 'completed').length
+  return `${completed}/${tasks.length}`
 }
 
 const fetchDashboard = async () => {
   try {
     const { data } = await axios.get(`${API_URL}/dashboard`)
     dashboard.value = data
+    
+    // Select first project by default
+    if (!activeProjectTab.value && data.projects?.length > 0) {
+      activeProjectTab.value = data.projects[0].id
+    }
+    
     await nextTick()
     renderCharts()
   } catch (e) {
@@ -222,35 +209,12 @@ const toggleTask = async (id) => {
   }
 }
 
-const createProject = async () => {
-  try {
-    await axios.post(`${API_URL}/projects`, { ...newProject.value, progress: 0 })
-    showProjectModal.value = false
-    newProject.value = { name: '', description: '', status: 'active', priority: 'medium' }
-    fetchDashboard()
-  } catch (e) {
-    console.error('Error creating project:', e)
-  }
-}
-
-const createTask = async () => {
-  try {
-    await axios.post(`${API_URL}/tasks`, { ...newTask.value, status: 'pending' })
-    showTaskModal.value = false
-    newTask.value = { title: '', description: '', projectId: '', priority: 'medium', dueDate: '' }
-    fetchDashboard()
-  } catch (e) {
-    console.error('Error creating task:', e)
-  }
-}
-
 let progressChartInstance = null
 let taskChartInstance = null
 
 const renderCharts = () => {
   if (!dashboard.value.projects) return
 
-  // Progress Chart (Bar)
   if (progressChart.value) {
     if (progressChartInstance) progressChartInstance.destroy()
     
@@ -278,7 +242,6 @@ const renderCharts = () => {
     })
   }
 
-  // Task Chart (Doughnut)
   if (taskChart.value) {
     if (taskChartInstance) taskChartInstance.destroy()
     
@@ -308,7 +271,6 @@ const renderCharts = () => {
 onMounted(() => {
   fetchDashboard()
   
-  // WebSocket for real-time updates
   const ws = new WebSocket(`ws://${window.location.host}/ws`)
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data)
@@ -426,97 +388,101 @@ onMounted(() => {
   height: 250px;
 }
 
-.content-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.card {
+/* Projects Tasks Section */
+.projects-tasks-section {
   background: rgba(255,255,255,0.05);
   border-radius: 12px;
   padding: 1.5rem;
   border: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 2rem;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.projects-tasks-section h2 {
   margin-bottom: 1rem;
+  color: #e4e4e7;
 }
 
-.card-header h2 {
-  font-size: 1.25rem;
+.project-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
-.btn-add {
-  width: 32px;
-  height: 32px;
+.project-tab {
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-tab:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.project-tab.active {
   background: #8b5cf6;
   color: white;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: background 0.2s;
+  border-color: #8b5cf6;
 }
 
-.btn-add:hover {
-  background: #7c3aed;
+.task-count {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
 }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.project-tab.active .task-count {
+  background: rgba(0,0,0,0.3);
 }
 
-.item {
+.project-tasks-content {
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.tasks-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  background: rgba(0,0,0,0.2);
-  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-.item-info {
-  flex: 1;
+.tasks-header h3 {
+  color: #e4e4e7;
+  margin: 0;
 }
 
-.item-name {
-  display: block;
-  font-weight: 500;
-}
-
-.item-desc {
-  display: block;
-  color: #9ca3af;
-  font-size: 0.85rem;
-}
-
-.item-title.completed {
-  text-decoration: line-through;
-  color: #9ca3af;
-}
-
-.item-meta {
-  color: #6b7280;
-  font-size: 0.8rem;
-}
-
-.item-status {
+.project-status {
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.75rem;
   text-transform: uppercase;
 }
 
-.item-status.active { background: #10b981; color: white; }
-.item-status.paused { background: #f59e0b; color: white; }
-.item-status.completed { background: #6b7280; color: white; }
+.project-status.active { background: #10b981; color: white; }
+.project-status.paused { background: #f59e0b; color: white; }
+.project-status.completed { background: #6b7280; color: white; }
+
+.project-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar.large {
+  flex: 1;
+  height: 12px;
+}
 
 .progress-bar {
   width: 100%;
@@ -532,21 +498,87 @@ onMounted(() => {
   transition: width 0.3s ease;
 }
 
-.priority {
+.progress-text {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  min-width: 40px;
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+}
+
+.task-row.completed {
+  border-left-color: #10b981;
+}
+
+.task-row.pending {
+  border-left-color: #f59e0b;
+}
+
+.task-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-title {
+  display: block;
+  font-weight: 500;
+  color: #e4e4e7;
+}
+
+.task-title.completed {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.task-desc {
+  display: block;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.task-due {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.priority-badge, .task-status-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.7rem;
   text-transform: uppercase;
 }
 
-.priority.high { background: #ef4444; color: white; }
-.priority.medium { background: #f59e0b; color: white; }
-.priority.low { background: #6b7280; color: white; }
+.priority-badge.high { background: #ef4444; color: white; }
+.priority-badge.medium { background: #f59e0b; color: white; }
+.priority-badge.low { background: #6b7280; color: white; }
 
-.task-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
+.task-status-badge.completed { background: #10b981; color: white; }
+.task-status-badge.pending { background: #f59e0b; color: white; }
+.task-status-badge.in_progress { background: #3b82f6; color: white; }
+
+.no-tasks {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
 }
 
 .motivational-card {
@@ -561,68 +593,5 @@ onMounted(() => {
 .motivational-card p {
   font-size: 1.1rem;
   font-style: italic;
-}
-
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.modal-content {
-  background: #1a1a2e;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.modal-content h3 {
-  margin-bottom: 0.5rem;
-}
-
-.modal-content input,
-.modal-content select {
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  color: white;
-  font-size: 1rem;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: none;
-  background: #8b5cf6;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.modal-actions button.cancel {
-  background: rgba(255,255,255,0.2);
-}
-
-.modal-actions button:hover {
-  opacity: 0.9;
 }
 </style>
