@@ -1,0 +1,79 @@
+[
+  {
+    "id": "cog1",
+    "projectId": "cognitrack",
+    "title": "Terminar monitor Ollama",
+    "description": "Completar sistema de monitoreo para servidor Ollama con métricas de GPU",
+    "status": "pending",
+    "priority": "high",
+    "dueDate": "2026-03-20",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z"
+  },
+  {
+    "id": "ip4",
+    "projectId": "ipcheck-go",
+    "title": "Completar History Page",
+    "description": "Crear HistoryView.vue con filtros, paginación y exportación CSV (docs/PENDING_TASKS.md)",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "2026-03-15",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z"
+  },
+  {
+    "id": "ip5",
+    "projectId": "ipcheck-go",
+    "title": "Completar Dashboard Analytics",
+    "description": "Crear estadísticas de búsquedas, gráficos con Chart.js, filtros por fecha",
+    "status": "pending",
+    "priority": "medium",
+    "dueDate": "2026-03-20",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z"
+  },
+  {
+    "id": "ip6",
+    "projectId": "ipcheck-go",
+    "title": "Esperar feedback de Eric",
+    "description": "Eric está probando la detección de bots en producción",
+    "status": "in_progress",
+    "priority": "high",
+    "dueDate": "2026-03-15",
+    "createdAt": "2026-03-09T11:17:12.748503831-06:00",
+    "updatedAt": "2026-03-09T11:17:12.74850394-06:00"
+  },
+  {
+    "id": "ip3",
+    "projectId": "ipcheck-go",
+    "title": "Detección de bots v2.9",
+    "description": "Sistema de detección con 90.9% accuracy - completado",
+    "status": "completed",
+    "priority": "high",
+    "dueDate": "2026-03-08",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "2026-03-09T11:00:00Z"
+  },
+  {
+    "id": "hem1",
+    "projectId": "hemingway-kayak",
+    "title": "APK compilado y requisitos cumplidos",
+    "description": "APK 8.8MB compilado - todos los requisitos del manual técnico cumplidos",
+    "status": "completed",
+    "priority": "medium",
+    "dueDate": "2026-03-08",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "2026-03-09T11:00:00Z"
+  },
+  {
+    "id": "sir1",
+    "projectId": "sirius",
+    "title": "Integrar tareas desde OpenClaw",
+    "description": "Cuando Peter me asigne tareas por chat, guardarlas automáticamente en Sirius",
+    "status": "in_progress",
+    "priority": "high",
+    "dueDate": "2026-03-15",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z"
+  }
+]

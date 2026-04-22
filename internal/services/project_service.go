@@ -1,118 +1,133 @@
 package services
 
 import (
+	"encoding/json"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
+
 	"sirius/internal/models"
 )
 
 type ProjectService struct {
-	projects map[string]*models.Project
-	mu       sync.RWMutex
-	projectsPath string
+	projects    map[string]*models.Project
+	mu          sync.RWMutex
+	projectsFile string
 }
 
 func NewProjectService() *ProjectService {
 	ps := &ProjectService{
-		projects: make(map[string]*models.Project),
-		projectsPath: os.Getenv("SIRIUS_PROJECTS_PATH"),
+		projects:     make(map[string]*models.Project),
+		projectsFile: getEnv("SIRIUS_PROJECTS_FILE", "data/projects.json"),
 	}
-	if ps.projectsPath == "" {
-		ps.projectsPath = "/home/peter/projects"
+	ps.loadFromFile()
+
+	// Seed with default projects if empty
+	if len(ps.projects) == 0 {
+		ps.seedDefaults()
+		ps.saveToFile()
 	}
-	ps.loadFromDisk()
+
 	return ps
 }
 
-func (ps *ProjectService) loadFromDisk() {
-	entries, err := os.ReadDir(ps.projectsPath)
+func (ps *ProjectService) loadFromFile() {
+	data, err := os.ReadFile(ps.projectsFile)
 	if err != nil {
 		return
 	}
+	var list []*models.Project
+	if err := json.Unmarshal(data, &list); err != nil {
+		return
+	}
+	for _, p := range list {
+		ps.projects[p.ID] = p
+	}
+}
 
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-		name := entry.Name()
-		// Skip hidden dirs only
-		if len(name) > 0 && name[0] == '.' {
-			continue
-		}
+func (ps *ProjectService) saveToFile() error {
+	ps.mu.RLock()
+	defer ps.mu.RUnlock()
 
-		// Check if it's a project (has go.mod, package.json, etc)
-		projectPath := filepath.Join(ps.projectsPath, name)
-		isProject := ps.isProjectDir(projectPath)
+	list := make([]*models.Project, 0, len(ps.projects))
+	for _, p := range ps.projects {
+		list = append(list, p)
+	}
 
-		status := "paused"
-		progress := 0
-		if isProject {
-			status = "active"
-			progress = ps.estimateProgress(projectPath)
-		}
+	data, err := json.MarshalIndent(list, "", "  ")
+	if err != nil {
+		return err
+	}
 
-		description := ps.getProjectDescription(projectPath, name)
+	return os.WriteFile(ps.projectsFile, data, 0644)
+}
 
-		project := &models.Project{
-			ID:          name,
-			Name:        name,
-			Description: description,
-			Status:      status,
-			Priority:    "medium",
-			Progress:    progress,
-			CreatedAt:   time.Now(),
+func (ps *ProjectService) seedDefaults() {
+	defaults := []*models.Project{
+		{
+			ID:          "ipcheck-go",
+			Name:        "ipcheck-go",
+			Description: "IP geolocation & bot detection AI — v2.9.411 LIVE",
+			Status:      "active",
+			Priority:    "high",
+			Progress:    85,
+			CreatedAt:   time.Now().Add(-720 * time.Hour),
 			UpdatedAt:   time.Now(),
-		}
-		ps.projects[name] = project
+		},
+		{
+			ID:          "sirius",
+			Name:        "Sirius Command Center",
+			Description: "Real-time dashboard for agents & projects monitoring",
+			Status:      "active",
+			Priority:    "high",
+			Progress:    60,
+			CreatedAt:   time.Now().Add(-48 * time.Hour),
+			UpdatedAt:   time.Now(),
+		},
+		{
+			ID:          "cognitrack",
+			Name:        "Cognitrack",
+			Description: "Monitor para servidor Ollama con métricas de GPU",
+			Status:      "active",
+			Priority:    "medium",
+			Progress:    30,
+			CreatedAt:   time.Now().Add(-360 * time.Hour),
+			UpdatedAt:   time.Now(),
+		},
+		{
+			ID:          "hemingway-kayak",
+			Name:        "Hemingway Kayak",
+			Description: "Mobile app project — APK 8.8MB compiled",
+			Status:      "active",
+			Priority:    "medium",
+			Progress:    70,
+			CreatedAt:   time.Now().Add(-240 * time.Hour),
+			UpdatedAt:   time.Now(),
+		},
+		{
+			ID:          "accounthub",
+			Name:        "AccountHub",
+			Description: "Migration of Control Panel — OpenProject #37",
+			Status:      "paused",
+			Priority:    "high",
+			Progress:    40,
+			CreatedAt:   time.Now().Add(-480 * time.Hour),
+			UpdatedAt:   time.Now(),
+		},
+		{
+			ID:          "donfeed",
+			Name:        "Donfeed",
+			Description: "DSB data feed service",
+			Status:      "paused",
+			Priority:    "low",
+			Progress:    15,
+			CreatedAt:   time.Now().Add(-600 * time.Hour),
+			UpdatedAt:   time.Now(),
+		},
 	}
-}
-
-func (ps *ProjectService) isProjectDir(path string) bool {
-	files := []string{"go.mod", "package.json", "Cargo.toml", "requirements.txt", "pyproject.toml"}
-	for _, f := range files {
-		if _, err := os.Stat(filepath.Join(path, f)); err == nil {
-			return true
-		}
+	for _, p := range defaults {
+		ps.projects[p.ID] = p
 	}
-	return false
-}
-
-func (ps *ProjectService) estimateProgress(path string) int {
-	if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
-		return 30
-	}
-	return 10
-}
-
-func (ps *ProjectService) getProjectDescription(path, name string) string {
-	readmeFiles := []string{"README.md", "README.txt", "readme.md"}
-	for _, f := range readmeFiles {
-		content, err := os.ReadFile(filepath.Join(path, f))
-		if err == nil {
-			for i, b := range content {
-				if b == '\n' {
-					return string(content[:i])
-				}
-			}
-			return string(content)
-		}
-	}
-
-	content, err := os.ReadFile(filepath.Join(path, "go.mod"))
-	if err == nil {
-		for i, b := range content {
-			if b == '\n' {
-				desc := string(content[:i])
-				if len(desc) > 6 {
-					return desc[6:]
-				}
-			}
-		}
-	}
-
-	return "Proyecto en " + path
 }
 
 func (ps *ProjectService) GetAll() []*models.Project {
@@ -125,23 +140,37 @@ func (ps *ProjectService) GetAll() []*models.Project {
 	return result
 }
 
+func (ps *ProjectService) Get(id string) (*models.Project, bool) {
+	ps.mu.RLock()
+	defer ps.mu.RUnlock()
+	p, ok := ps.projects[id]
+	return p, ok
+}
+
 func (ps *ProjectService) Create(project *models.Project) *models.Project {
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
-	project.ID = generateID()
+
+	if project.ID == "" {
+		project.ID = time.Now().Format("20060102150405")
+	}
 	project.CreatedAt = time.Now()
 	project.UpdatedAt = time.Now()
 	ps.projects[project.ID] = project
+	ps.saveToFileLocked()
+
 	return project
 }
 
 func (ps *ProjectService) Update(id string, project *models.Project) (*models.Project, bool) {
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
+
 	if _, exists := ps.projects[id]; exists {
 		project.ID = id
 		project.UpdatedAt = time.Now()
 		ps.projects[id] = project
+		ps.saveToFileLocked()
 		return project, true
 	}
 	return nil, false
@@ -150,13 +179,31 @@ func (ps *ProjectService) Update(id string, project *models.Project) (*models.Pr
 func (ps *ProjectService) Delete(id string) bool {
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
+
 	if _, exists := ps.projects[id]; exists {
 		delete(ps.projects, id)
+		ps.saveToFileLocked()
 		return true
 	}
 	return false
 }
 
-func generateID() string {
-	return time.Now().Format("20060102150405")
+// saveToFileLocked must be called with mu held
+func (ps *ProjectService) saveToFileLocked() error {
+	list := make([]*models.Project, 0, len(ps.projects))
+	for _, p := range ps.projects {
+		list = append(list, p)
+	}
+	data, err := json.MarshalIndent(list, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(ps.projectsFile, data, 0644)
+}
+
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }
