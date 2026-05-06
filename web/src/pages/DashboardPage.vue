@@ -27,29 +27,34 @@
     </div>
     <div class="sys-monitor">
       <div class="sys-gauge">
-        <div class="gauge-label">CPU</div>
-        <div class="gauge-bar"><div class="gauge-fill" :style="{ width: cpuPct + '%', background: cpuColor }"></div></div>
+        <div class="gauge-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg> CPU</div>
+        <div class="gauge-bar"><div class="gauge-fill" :style="{ width: cpuPct + '%', background: cpuColor, boxShadow: '0 0 6px ' + cpuColor }"></div></div>
         <div class="gauge-val">{{ cpuPct }}%</div>
+        <div class="gauge-sub">{{ sysInfo.cpu?.cores || '?' }} cores</div>
       </div>
       <div class="sys-gauge">
-        <div class="gauge-label">RAM</div>
+        <div class="gauge-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 20h16"/></svg> RAM</div>
         <div class="gauge-bar"><div class="gauge-fill" :style="{ width: ramPct + '%', background: ramColor }"></div></div>
         <div class="gauge-val">{{ ramVal }}</div>
+        <div class="gauge-sub">/ {{ totalRam }} GB · {{ ramPct }}%</div>
       </div>
       <div class="sys-gauge" v-if="gpuLoaded">
-        <div class="gauge-label">GPU</div>
+        <div class="gauge-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> GPU</div>
         <div class="gauge-bar"><div class="gauge-fill" :style="{ width: gpuPct + '%', background: gpuColor }"></div></div>
         <div class="gauge-val">{{ gpuVal }}</div>
+        <div class="gauge-sub">{{ sysInfo.gpu?.processes || 0 }} procesos</div>
       </div>
       <div class="sys-gauge">
-        <div class="gauge-label">Disco</div>
+        <div class="gauge-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><ellipse cx="12" cy="12" rx="10" ry="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg> Disco</div>
         <div class="gauge-bar"><div class="gauge-fill" :style="{ width: diskPct + '%', background: diskColor }"></div></div>
         <div class="gauge-val">{{ diskVal }}</div>
+        <div class="gauge-sub">/ {{ totalDisk }} GB · {{ diskPct }}%</div>
       </div>
       <div class="sys-gauge">
-        <div class="gauge-label">Ollama</div>
-        <div class="gauge-bar"><div class="gauge-fill" :style="{ width: '100%', background: ollamaOnline ? 'var(--success)' : 'var(--text-muted)' }"></div></div>
+        <div class="gauge-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Ollama</div>
+        <div class="gauge-bar"><div class="gauge-fill" :style="{ width: ollamaOnline ? '100%' : '20%', background: ollamaOnline ? 'var(--success)' : 'var(--text-muted)' }"></div></div>
         <div class="gauge-val">{{ ollamaOnline ? '🟢' : '🔴' }} {{ modelsCount }}</div>
+        <div class="gauge-sub">{{ sysInfo.uptime || '' }}</div>
       </div>
     </div>
 
@@ -120,8 +125,10 @@ const agentsActive = computed(() => workingAgents.value.length)
 const cpuPct = computed(() => sysInfo.value.cpu?.used || 0)
 const ramPct = computed(() => { const r = sysInfo.value.ram; return r?.total ? Math.round((r.used / r.total) * 100) : 0 })
 const ramVal = computed(() => { const r = sysInfo.value.ram; return r?.used ? `${r.used.toFixed(1)} GB` : '?' })
+const totalRam = computed(() => sysInfo.value.ram?.total?.toFixed(0) || '?')
 const diskPct = computed(() => { const d = sysInfo.value.disk; return d?.total ? Math.round((d.used / d.total) * 100) : 0 })
 const diskVal = computed(() => { const d = sysInfo.value.disk; return d?.used ? `${d.used.toFixed(0)} GB` : '?' })
+const totalDisk = computed(() => sysInfo.value.disk?.total?.toFixed(0) || '?')
 const gpuLoaded = computed(() => sysInfo.value.gpu?.loaded)
 const gpuPct = computed(() => { const g = sysInfo.value.gpu; return g?.vramTotal ? Math.round((g.vramUsed / g.vramTotal) * 100) : 0 })
 const gpuVal = computed(() => { const g = sysInfo.value.gpu; return g?.loaded ? `${g.vramUsed?.toFixed(1)} GB` : '—' })
@@ -190,11 +197,13 @@ onUnmounted(() => {
 .section-link:hover { background: var(--hover); }
 
 .sys-monitor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 24px; }
-.sys-gauge { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; }
-.gauge-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-.gauge-bar { height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
-.gauge-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-.gauge-val { font-size: 14px; font-weight: 700; font-family: var(--font-mono); }
+.sys-gauge { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; }
+.sys-gauge:first-child { background: linear-gradient(135deg, var(--panel) 0%, rgba(94,106,210,0.08) 100%); border-color: rgba(94,106,210,0.3); }
+.gauge-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.gauge-bar { height: 8px; background: var(--surface); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.gauge-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease, box-shadow 0.5s ease; }
+.gauge-val { font-size: 20px; font-weight: 700; font-family: var(--font-mono); line-height: 1.2; }
+.gauge-sub { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
 
 .agents-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px; }
 .agents-grid.has-working { opacity: 0.6; }
