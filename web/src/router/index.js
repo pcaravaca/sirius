@@ -1,71 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  {
-    path: '/',
-    name: 'dashboard',
-    component: () => import('@/pages/DashboardPage.vue'),
-    meta: { icon: '🏠', label: 'Dashboard' },
-  },
-  {
-    path: '/projects',
-    name: 'projects',
-    component: () => import('@/pages/ProjectsPage.vue'),
-    meta: { icon: '📁', label: 'Projects' },
-  },
-  {
-    path: '/projects/:id',
-    name: 'project-detail',
-    component: () => import('@/pages/ProjectDetailPage.vue'),
-    meta: { icon: '📁', label: 'Project', hidden: true },
-  },
-  {
-    path: '/agents',
-    name: 'agents',
-    component: () => import('@/pages/AgentsPage.vue'),
-    meta: { icon: '🤖', label: 'Agents' },
-  },
-  {
-    path: '/agents/:id',
-    name: 'agent-detail',
-    component: () => import('@/pages/AgentDetailPage.vue'),
-    meta: { icon: '🤖', label: 'Agent', hidden: true },
-  },
-  {
-    path: '/analytics',
-    name: 'analytics',
-    component: () => import('@/pages/AnalyticsPage.vue'),
-    meta: { icon: '📊', label: 'Analytics' },
-  },
-  {
-    path: '/system',
-    name: 'system',
-    component: () => import('@/pages/SystemPage.vue'),
-    meta: { icon: '🖥️', label: 'System' },
-  },
-  {
-    path: '/exchange',
-    name: 'exchange',
-    component: () => import('@/pages/ExchangePage.vue'),
-    meta: { icon: '💱', label: 'Exchange' },
-  },
-  {
-    path: '/news',
-    name: 'news',
-    component: () => import('@/pages/NewsPage.vue'),
-    meta: { icon: '📰', label: 'News' },
-  },
-  {
-    path: '/settings',
-    name: 'settings',
-    component: () => import('@/pages/SettingsPage.vue'),
-    meta: { icon: '⚙️', label: 'Settings' },
-  },
+  { path: '/', name: 'Dashboard', component: () => import('@/pages/DashboardPage.vue') },
+  { path: '/agents', name: 'Agentes', component: () => import('@/pages/AgentsPage.vue') },
+  { path: '/projects', name: 'Proyectos', component: () => import('@/pages/ProjectsPage.vue') },
+  { path: '/analytics', name: 'Analytics', component: () => import('@/pages/AnalyticsPage.vue') },
+  { path: '/system', name: 'Sistema', component: () => import('@/pages/SystemPage.vue') },
+  { path: '/exchange', name: 'Exchange', component: () => import('@/pages/ExchangePage.vue') },
+  { path: '/news', name: 'Noticias', component: () => import('@/pages/NewsPage.vue') },
 ]
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-})
-
+const router = createRouter({ history: createWebHistory(), routes })
 export default router
