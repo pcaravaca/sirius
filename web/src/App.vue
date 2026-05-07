@@ -1,56 +1,48 @@
 <template>
   <div class="app-layout">
-    <Sidebar />
-    <div class="app-main">
-      <TopBar />
-      <main class="app-content">
+    <Sidebar :collapsed="sidebarCollapsed" @toggle="sidebarCollapsed = !sidebarCollapsed" />
+    <div class="main-area">
+      <TopBar @toggle-sidebar="sidebarCollapsed = !sidebarCollapsed" :collapsed="sidebarCollapsed" />
+      <div class="content-area">
         <router-view />
-      </main>
+      </div>
       <StatusBar />
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, provide } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import TopBar from '@/components/TopBar.vue'
 import StatusBar from '@/components/StatusBar.vue'
+
+const sidebarCollapsed = ref(false)
+const wsConnected = ref(false)
+provide('wsConnected', wsConnected)
 </script>
 
 <style scoped>
+/* ── CRITICAL: Flexbox layout que NO shiftea ── */
 .app-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
-  background: var(--color-canvas);
-}
-
-.app-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
   overflow: hidden;
 }
 
-.app-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-6);
-  background: var(--color-canvas);
+.main-area {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .app-layout {
-    flex-direction: column;
-  }
-
-  .app-main {
-    order: 1;
-  }
-
-  .app-content {
-    padding: var(--space-3);
-  }
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 </style>

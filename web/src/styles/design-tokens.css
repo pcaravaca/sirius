@@ -1,51 +1,93 @@
-/* Sirius v2 Design Tokens — Linear-inspired dark mode */
+/* Sirius — TrueNAS Scale Dark Theme */
+
 :root {
-  /* Canvas & Surfaces */
-  --color-canvas: #08090a;
-  --color-panel: #0f1011;
-  --color-surface: #191a1b;
-  --color-elevated: #28282c;
-  --color-hover: #2e2e32;
+  /* ── Background Layers ── */
+  --canvas: #0d1117;
+  --panel: #161b22;
+  --surface: #1c2333;
+  --elevated: #252d3a;
 
-  /* Text */
-  --color-text-primary: #f7f8f8;
-  --color-text-secondary: #d0d6e0;
-  --color-text-muted: #8a8f98;
-  --color-text-subtle: #62666d;
+  /* ── Brand / Accent (TrueNAS blue) ── */
+  --brand: #0099ff;
+  --brand-interactive: #1aadff;
+  --brand-hover: #33b5ff;
 
-  /* Brand Accent */
-  --color-accent: #5e6ad2;
-  --color-accent-bright: #7170ff;
-  --color-accent-hover: #828fff;
+  /* ── Semantic Colors ── */
+  --success: #00a86b;
+  --error: #e74c3c;
+  --warning: #f0a030;
+  --info: #5b9bd5;
 
-  /* Status */
-  --color-success: #10b981;
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
-  --color-info: #3b82f6;
+  /* ── Text ── */
+  --text-primary: #e6edf3;
+  --text-secondary: #b0b8c4;
+  --text-muted: #636d7c;
 
-  /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.05);
+  /* ── Borders ── */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.035);
   --border-standard: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --border-solid: #23252a;
+  --hover: rgba(255, 255, 255, 0.05);
 
-  /* Typography */
-  --font-primary: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* ── Aliases for existing component classes ── */
+  --color-panel: var(--panel);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--brand);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-hover: var(--hover);
 
-  /* Sizes */
-  --font-display: 48px;
-  --font-h1: 32px;
-  --font-h2: 24px;
-  --font-h3: 20px;
-  --font-body: 16px;
-  --font-small: 15px;
-  --font-caption: 13px;
-  --font-label: 12px;
-  --font-micro: 11px;
+  /* ── Team Colors ── */
+  --team-leadership: #7c8cf8;
+  --team-software: #0099ff;
+  --team-finance: #f0a030;
+  --team-analytics: #e06b9a;
+  --team-infra: #f07c3c;
+  --team-support: #00a86b;
 
-  /* Spacing */
+  /* ── Layout ── */
+  --sidebar-width: 220px;
+  --sidebar-collapsed: 56px;
+  --topbar-height: 48px;
+  --statusbar-height: 40px;
+
+  /* ── Typography ── */
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 32px;
+  --font-h1: var(--font-size-2xl);
+  --font-h2: var(--font-size-xl);
+  --font-h3: var(--font-size-lg);
+  --font-body: var(--font-size-base);
+  --font-caption: var(--font-size-sm);
+  --font-micro: var(--font-size-xs);
+
+  /* ── Shadows / Glow ── */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
+  --glow-brand: 0 0 12px rgba(0,153,255,0.25);
+  --glow-success: 0 0 12px rgba(0,168,107,0.25);
+  --glow-error: 0 0 12px rgba(231,76,60,0.25);
+
+  /* ── Radii ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+
+  /* ── Spacing ── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -53,30 +95,32 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
 
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-sm: rgba(0, 0, 0, 0.03) 0px 1.2px 0px 0px;
-  --shadow-md: rgba(0, 0, 0, 0.2) 0px 0px 0px 1px;
-  --shadow-lg: rgba(0, 0, 0, 0.4) 0px 2px 4px;
-  --shadow-inset: rgba(0, 0, 0, 0.2) 0px 0px 12px 0px inset;
-
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-
-  /* Layout */
-  --sidebar-width: 220px;
-  --sidebar-collapsed: 56px;
-  --topbar-height: 48px;
-  --statusbar-height: 32px;
+  /* ── Transitions ── */
+  --transition-fast: 120ms ease;
+  --transition-normal: 220ms ease;
 }
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+#app { height: 100%; }
+
+/* ── Scrollbar (TrueNAS style) ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--canvas); }
+::-webkit-scrollbar-thumb { background: var(--elevated); border-radius: 3px; border: 1px solid transparent; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+::selection { background: var(--brand); color: #fff; }

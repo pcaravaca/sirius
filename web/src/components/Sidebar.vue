@@ -1,192 +1,131 @@
 <template>
   <aside class="sidebar" :class="{ collapsed }">
     <div class="sidebar-header">
-      <span class="logo">⭐</span>
-      <span class="logo-text" v-if="!collapsed">Sirius</span>
+      <div class="logo" @click="$emit('toggle')">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5"/>
+        </svg>
+        <span v-show="!collapsed" class="logo-text">Sirius</span>
+      </div>
     </div>
-
     <nav class="sidebar-nav">
-      <router-link
-        v-for="item in navItems"
-        :key="item.to"
-        :to="item.to"
-        class="nav-item"
-        :class="{ active: isActive(item.to) }"
-        :title="item.label"
-      >
-        <span class="nav-icon">{{ item.icon }}</span>
-        <span class="nav-label" v-if="!collapsed">{{ item.label }}</span>
-        <span class="nav-badge" v-if="item.badge && !collapsed">{{ item.badge }}</span>
+      <router-link v-for="item in navItems" :key="item.path" :to="item.path" class="nav-item" :title="item.label">
+        <span class="nav-icon" v-html="item.icon"></span>
+        <span v-show="!collapsed" class="nav-label">{{ item.label }}</span>
       </router-link>
     </nav>
-
     <div class="sidebar-footer">
-      <button class="nav-item" @click="collapsed = !collapsed" :title="collapsed ? 'Expand' : 'Collapse'">
-        <span class="nav-icon">{{ collapsed ? '→' : '←' }}</span>
-        <span class="nav-label" v-if="!collapsed">Collapse</span>
-      </button>
+      <div class="version-badge" v-show="!collapsed">v3.1</div>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+defineProps({ collapsed: Boolean })
+defineEmits(['toggle'])
 
-const route = useRoute()
-const collapsed = ref(false)
-
-const navItems = computed(() => [
-  { to: '/', icon: '🏠', label: 'Dashboard' },
-  { to: '/projects', icon: '📁', label: 'Projects' },
-  { to: '/agents', icon: '🤖', label: 'Agents' },
-  { to: '/analytics', icon: '📊', label: 'Analytics' },
-  { to: '/system', icon: '🖥️', label: 'System' },
-  { to: '/exchange', icon: '💱', label: 'Exchange' },
-  { to: '/news', icon: '📰', label: 'News' },
-  { to: '/settings', icon: '⚙️', label: 'Settings' },
-])
-
-function isActive(to) {
-  if (to === '/') return route.path === '/'
-  return route.path.startsWith(to)
-}
+const navItems = [
+  { path: '/', label: 'Dashboard', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>' },
+  { path: '/agents', label: 'Agentes', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  { path: '/projects', label: 'Proyectos', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>' },
+  { path: '/analytics', label: 'Analytics', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>' },
+  { path: '/system', label: 'Sistema', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>' },
+  { path: '/exchange', label: 'Exchange', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+  { path: '/news', label: 'Noticias', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/></svg>' },
+]
 </script>
 
 <style scoped>
 .sidebar {
+  flex-shrink: 0;
   width: var(--sidebar-width);
-  height: 100%;
-  background: var(--color-panel);
-  border-right: 1px solid var(--border-subtle);
+  height: 100vh;
+  background: #0a0e14;
+  border-right: 1px solid rgba(0, 153, 255, 0.08);
   display: flex;
   flex-direction: column;
   transition: width var(--transition-normal);
-  flex-shrink: 0;
   overflow: hidden;
 }
-
-.sidebar.collapsed {
-  width: var(--sidebar-collapsed);
-}
+.sidebar.collapsed { width: var(--sidebar-collapsed); }
 
 .sidebar-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  height: var(--topbar-height);
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+.logo:hover { background: rgba(0,153,255,0.06); }
+
+.logo-icon {
+  width: 26px; height: 26px;
+  color: var(--brand);
   flex-shrink: 0;
 }
-
 .logo-text {
-  font-size: var(--font-small);
-  font-weight: 590;
-  letter-spacing: -0.165px;
-  color: var(--color-text-primary);
+  font-size: 18px; font-weight: 700;
+  color: var(--text-primary);
   white-space: nowrap;
+  letter-spacing: -0.3px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: var(--space-2);
-  overflow-y: auto;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  gap: 10px;
+  padding: 9px 10px;
   border-radius: var(--radius-md);
-  color: var(--color-text-muted);
-  font-size: var(--font-small);
-  font-weight: 510;
-  letter-spacing: -0.165px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  color: var(--text-secondary);
   text-decoration: none;
+  transition: all var(--transition-fast);
   white-space: nowrap;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-left: 2px solid transparent;
 }
-
 .nav-item:hover {
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
+  background: rgba(0,153,255,0.06);
+  color: var(--text-primary);
+  border-left-color: rgba(0,153,255,0.2);
 }
-
-.nav-item.active {
-  background: rgba(94, 106, 210, 0.15);
-  color: var(--color-accent-bright);
+.nav-item.router-link-exact-active {
+  background: rgba(0,153,255,0.1);
+  color: var(--brand);
+  border-left-color: var(--brand);
 }
 
 .nav-icon {
-  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px;
   flex-shrink: 0;
-  width: 24px;
-  text-align: center;
+  opacity: 0.7;
 }
-
-.nav-label {
-  flex: 1;
-}
-
-.nav-badge {
-  background: var(--color-accent);
-  color: white;
-  font-size: var(--font-micro);
-  font-weight: 510;
-  padding: 1px 6px;
-  border-radius: var(--radius-full);
-}
+.nav-item:hover .nav-icon,
+.nav-item.router-link-exact-active .nav-icon { opacity: 1; }
 
 .sidebar-footer {
-  padding: var(--space-2);
-  border-top: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
 }
-
-/* Mobile: sidebar becomes bottom nav */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100% !important;
-    height: auto;
-    flex-direction: row;
-    border-right: none;
-    border-top: 1px solid var(--border-subtle);
-    order: 999;
-  }
-
-  .sidebar-header,
-  .sidebar-footer {
-    display: none;
-  }
-
-  .sidebar-nav {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: var(--space-1);
-    gap: var(--space-1);
-  }
-
-  .nav-item {
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--space-1) var(--space-2);
-    min-width: 56px;
-    justify-content: center;
-  }
-
-  .nav-label {
-    font-size: var(--font-micro);
-  }
-
-  .nav-icon {
-    font-size: 20px;
-  }
+.version-badge {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 </style>
